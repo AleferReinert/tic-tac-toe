@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 
+const player1 = 'You';
+const player2 = 'Computer';
+
 function Square(props) {
     const element = () => {
         if(props.value === 'X'){
@@ -71,6 +74,7 @@ class Game extends React.Component {
         const history = this.state.history.slice(0,this.state.stepNumber + 1);
         const current = history[history.length - 1];
         const squares = current.squares.slice();
+        const xIsNext = this.state.xIsNext;
         const col = () => {
             if(i === 0 || i === 3 || i === 6){
                 return 1;
@@ -102,6 +106,33 @@ class Game extends React.Component {
             xIsNext: !this.state.xIsNext,
             stepNumber: history.length
         })
+
+        // Random play of computer
+        function randomPlay(array){
+            if(xIsNext === true){
+                const randonSquare = Math.floor(Math.random() * array.length);
+                const randonSquareSelector = document.querySelector(`.square[data-index='${randonSquare}']`);
+                const squares = document.querySelectorAll('.square');
+
+                if(array[randonSquare] !== null){
+                    randomPlay(array);
+                    return;
+                }
+                // Disabled buttons for prevent multiple clicks of player1
+                squares.forEach(square => {
+                    square.disabled = true;
+                });
+                setTimeout(() => {
+                    randonSquareSelector.disabled = false;
+                    randonSquareSelector.click();
+                    squares.forEach(square => {
+                        square.disabled = false;
+                    });
+                    return;
+                }, 1000);
+            }
+        }
+        randomPlay(squares);
     }
 
     jumpTo(step){
@@ -116,27 +147,45 @@ class Game extends React.Component {
         const current = history[this.state.stepNumber];
         const winner = calculateWinner(current.squares);
         const moves = history.map((step, move) => {
-            const desc = move ? 
-                `Go to move #${move} (row ${step.row}, col ${step.col})`: 
-                'Go to game start';
+            const renderButtonHistory = () => {
+                const isPlayer1 = move % 2 === 1 ? true : false;
+                if(move === 0){
+                    return (
+                        <button onClick={() => {this.jumpTo(move)}}>
+                            Go to game start
+                        </button>
+                    )
+                } else if(isPlayer1){ // Disabled computer history
+                    return(
+                        <button
+                            onClick={() => {this.jumpTo(move)}}
+                        >
+                            <span>Move { Math.round(move/2) }:</span>
+                            <span>{ `column${step.col}, row${step.row}` }</span>
+                        </button>
+                    )
+                }
+            }
             return (
                 <li key={ move }>
-                    <button onClick={() => {this.jumpTo(move)}}>{ `${move+1}. ${desc}` }</button>
+                    { renderButtonHistory() }
                 </li>
             )
         })
 
         let status;
+        let nextPlayer;
         if (winner) {
-            status = winner;
+            status = winner === 'X' ? player1 : player2;
+            nextPlayer = 'End game';
         } else if(this.state.stepNumber === 9){
             status = 'Tie';
+            nextPlayer = 'End game';
         } else {
             status = '--';
+            nextPlayer = this.state.xIsNext ? `${player1} (X)` : `${player2} (O)`;
         }
-        let nextPlayer = this.state.xIsNext ? '1 (X)' : '2 (O)';
 
-        
         if(!winner && document.querySelector('.winner') !== null){
             document.querySelectorAll('.winner').forEach(e => {
                 e.classList.remove('winner');
@@ -164,7 +213,7 @@ class Game extends React.Component {
                     <div className='column-3'>
                         <div className="game-info right">
                             <h2>Next move:</h2>
-                            <p>Player { nextPlayer }</p>
+                            <p>{ nextPlayer }</p>
                         </div>
                     </div>
                 </main>
@@ -174,7 +223,6 @@ class Game extends React.Component {
 }
 
 function calculateWinner(squares){
-    console.log(squares)
     const lines = [
         [0,1,2],
         [3,4,5],

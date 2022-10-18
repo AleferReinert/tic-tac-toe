@@ -45,10 +45,10 @@ p {
 	color: var(--text-light);
 }
 
-.board-row:after {
-	clear: both;
-	content: "";
-	display: table;
+.game {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 .status {
@@ -66,6 +66,25 @@ p {
 	justify-content: center;
 	align-items: center;
 	position: relative;
+}
+
+@keyframes blink {
+	0% { transform: scale(1) rotate(45deg); }
+	50% {  transform: scale(1.15) rotate(45deg);}
+}
+
+.square.winner {
+	color: #fff;
+	background: #1f8f76;
+}
+
+.square.winner span {
+	animation: blink .8s linear infinite;
+}
+
+
+.square:focus {
+	outline: none;
 }
 
 .square + .square {
@@ -115,30 +134,18 @@ p {
 	border-radius: 5px;
 }
 
-.square.winner {
-	color: #fff;
-	background: #1f8f76;
-}
-
-.square:focus {
-	outline: none;
-}
-
-.kbd-navigation .square:focus {
-	background: #ddd;
-}
-
-.game {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+.board-row:after {
+	clear: both;
+	content: "";
+	display: table;
 }
 
 .grid {
 	display: grid;
 	grid-template-rows: auto auto;
-	grid-template-columns: auto max-content;
+	grid-template-columns: 3fr 2fr;
 	row-gap: 25px;
+	column-gap: 25px;
 	width: 100%;
 }
 
@@ -178,9 +185,17 @@ button {
 	color: var(--text-light);
 	font-weight: 300;
 	font-size: inherit;
+	display: flex;
+	width: 100%;
+	column-gap: 10px;
 }
 
-button:hover {
+button:disabled {
+	cursor: default;
+}
+
+ul li:first-child button:hover,
+ul li:nth-child(even) button:hover {
 	text-decoration: underline;
 }
 
@@ -191,6 +206,8 @@ button:hover {
 	height: var(--element-width);
 	display: block;
 	box-sizing: border-box;
+	transform: rotate(45deg);
+	filter: drop-shadow(5px 5px 4px rgba(0,0,0,.25));
 }
 
 .x {
@@ -200,6 +217,7 @@ button:hover {
 	box-sizing: border-box;
 	position: relative;
 	transform: rotate(45deg);
+	filter: drop-shadow(10px 0 4px rgba(0,0,0,.25));
 }
 
 .x::before,
@@ -239,7 +257,7 @@ button:hover {
 	}
 
 	.column-1 .game-info {
-		min-width: 245px;
+		min-width: 186px;
 		justify-content: flex-end;
 		width: fit-content;
 	}
@@ -252,6 +270,7 @@ button:hover {
 		grid-template-columns: 1fr auto 1fr;
 		grid-template-rows: auto;
 		column-gap: 50px;
+		row-gap: 0;
 		width: auto;
 	}
 }
