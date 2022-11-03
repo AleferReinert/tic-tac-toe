@@ -25,11 +25,6 @@ body {
 	font-weight: 300;
 }
 
-ul {
-	list-style: none;
-	margin: 0;
-}
-
 h1 {
 	margin: 20px 0 20px;
 	color: var(--primary-color);
@@ -41,23 +36,6 @@ h2 {
 	font-size: 1.4rem;
 }
 
-h2 + p {
-	margin-bottom: 10px;
-}
-
-@keyframes blink-winner {
-	0% { transform: scale(1); }
-	50% {  transform: scale(0.95);}
-}
-
-h2.winner-text {
-    animation: blink-winner .8s linear infinite;
-}
-
-p {
-	color: var(--text-light);
-}
-
 .game {
 	display: flex;
 	flex-direction: column;
@@ -65,8 +43,8 @@ p {
     text-align: center;
 }
 
-.status {
-	margin-bottom: 10px;
+.finished .square {
+    cursor: default;
 }
 
 .square {
@@ -82,11 +60,6 @@ p {
 	position: relative;
 }
 
-@keyframes blink {
-	0% { transform: scale(1) rotate(45deg); }
-	50% {  transform: scale(1.15) rotate(45deg);}
-}
-
 .square.winner {
 	color: #fff;
 	background: #1f8f76;
@@ -95,7 +68,6 @@ p {
 .square.winner span {
 	animation: blink .8s linear infinite;
 }
-
 
 .square:focus {
 	outline: none;
@@ -114,6 +86,11 @@ p {
 	position: absolute;
 	left: 0;
 	top: 0;
+}
+
+@keyframes blink {
+	0% { transform: scale(1) rotate(45deg); }
+	50% { transform: scale(1.15) rotate(45deg);}
 }
 
 .board-row:nth-child(1) .square:nth-child(2)::after,
@@ -199,11 +176,6 @@ button:disabled {
     color: #fff;
 }
 
-ul li:first-child button:hover,
-ul li:nth-child(even) button:hover {
-	text-decoration: underline;
-}
-
 .o {
 	border: 5px solid #fff;
 	border-radius: 100%;
@@ -248,8 +220,4 @@ ul li:nth-child(even) button:hover {
 	left: 0;
 	width: 100%;
 	height: var(--border-width);
-}
-
-@media all and (min-width: 768px) {
-
 }

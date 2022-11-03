@@ -10,7 +10,7 @@ export function Square(props) {
     }
     return (
         <button className="square" onClick={props.onClick} data-index={props.index}>
-            {element()}
+            { element() }
         </button>
     );
 }

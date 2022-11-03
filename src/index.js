@@ -1,9 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import { Board } from './components/Board'
-import { CalculateWinner } from './components/CalculateWinner'
-import { RandomMove } from './components/RandomMove'
+import { Board } from './components/Board';
+import { CalculateWinner } from './components/CalculateWinner';
+import { GetRandom } from './components/GetRandom';
+import { ComputerClick } from './components/ComputerClick';
+import { MoveWinner } from './components/MoveWinner';
 
 const player1 = 'You';
 const player2 = 'Computer';
@@ -22,6 +24,9 @@ class Game extends React.Component {
             xIsNext: true,
             stepNumber: 0
         }
+        this.allMoves = Array(9).fill(null);
+        this.computerMoves = [];
+        this.gameFinished = '';
     }
 
     handleClick(i) {
@@ -61,7 +66,25 @@ class Game extends React.Component {
             stepNumber: history.length
         })
 
-        RandomMove(squares, xIsNext);
+        // Mantem um array atualizado de todas jogadas
+        this.allMoves[i] = xIsNext ? 'X' : 'O';
+
+        // Mantem um array atualizado com as jogadas do computador
+        if(!xIsNext) {
+            this.computerMoves.push(i);
+        }
+        
+        /*
+            Jogada do computador
+            Se for possível fechar uma linha, é simulado o click no quadrado faltante,
+            se não, retorna uma jogada aleatória
+        */
+        if (xIsNext && this.state.stepNumber < 8) {
+            const moveWinner = MoveWinner(this.allMoves, this.computerMoves, xIsNext);
+            const index = moveWinner ? moveWinner : GetRandom(this.allMoves);
+            const square = document.querySelector(`.square[data-index='${ index }']`);
+            ComputerClick(square);
+        }
     }
 
     jumpTo(step) {
@@ -77,16 +100,15 @@ class Game extends React.Component {
         const winner = CalculateWinner(current.squares);
 
         let status;
-        let nextPlayer;
         if (winner) {
+            this.gameFinished = 'finished';
             status = winner === 'X' ? `${player1} winner` : `${player2} winner`;
-            nextPlayer = 'End game';
         } else if (this.state.stepNumber === 9) {
+            this.gameFinished = 'finished';
             status = 'Tie';
-            nextPlayer = 'End game';
         } else {
-            status = '';
-            nextPlayer = this.state.xIsNext ? `${player1} (X)` : `${player2} (O)`;
+            this.gameFinished = '';
+            status = this.state.xIsNext ? `Next: ${player1} (X)` : `Next: ${player2} (O)`;
         }
 
         if (!winner && document.querySelector('.winner') !== null) {
@@ -95,7 +117,7 @@ class Game extends React.Component {
             })
         }
         return (
-            <div className="game">
+            <div className={ `game ${this.gameFinished}` }>
                 <h1>Tic Tac Toe</h1>
                 <main className="game-board">
                     <Board
@@ -104,20 +126,14 @@ class Game extends React.Component {
                     />
                 </main>
                 <aside className="game-info">
-
-                    {status !== '' ? (
-                        <>
-                            <h2 className="winner-text">{status}</h2>
+                    <h2>{status}</h2>
+                    {
+                        winner ? (
                             <button onClick={() => { this.jumpTo(0) }} id="btn-restart">
                                 Restart
                             </button>
-                        </>
-                    ) : (
-                        <>
-                            <h2>Next move: </h2>
-                            <p>{nextPlayer}</p>
-                        </>
-                    )}
+                        ) : ''
+                    }
                 </aside>
             </div>
         );
