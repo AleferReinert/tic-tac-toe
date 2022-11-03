@@ -17,100 +17,89 @@ class Game extends React.Component {
         super(props);
         this.state = {
             history: [{
-                squares: Array(9).fill(null),
-                col: null,
-                row: null
+                squares: Array(9).fill(null)
             }],
-            xIsNext: true,
-            stepNumber: 0
+            xIsNext: true
         }
+        this.stepNumber = 0;
         this.allMoves = Array(9).fill(null);
         this.computerMoves = [];
+        this.playerMoves = [];
         this.gameFinished = '';
     }
 
     handleClick(i) {
-        const history = this.state.history.slice(0, this.state.stepNumber + 1);
+        const history = this.state.history.slice(0, this.stepNumber + 1);
         const current = history[history.length - 1];
         const squares = current.squares.slice();
         const xIsNext = this.state.xIsNext;
-        const col = () => {
-            if (i === 0 || i === 3 || i === 6) {
-                return 1;
-            } else if (i === 1 || i === 4 || i === 7) {
-                return 2;
-            } else {
-                return 3;
-            }
-        }
-        const row = () => {
-            if (i === 0 || i === 1 || i === 2) {
-                return 1;
-            } else if (i === 3 || i === 4 || i === 5) {
-                return 2;
-            } else {
-                return 3;
-            }
-        }
         if (CalculateWinner(squares) || squares[i]) {
             return;
         }
-        squares[i] = this.state.xIsNext ? 'X' : 'O';
+        squares[i] = xIsNext ? 'X' : 'O';
         this.setState({
             history: history.concat([{
-                squares: squares,
-                col: col(),
-                row: row()
+                squares: squares
             }]),
-            xIsNext: !this.state.xIsNext,
-            stepNumber: history.length
+            xIsNext: !xIsNext
         })
-
-        // Mantem um array atualizado de todas jogadas
+        this.stepNumber = history.length;
+        
+        // Atualiza os arrays das jogadas
         this.allMoves[i] = xIsNext ? 'X' : 'O';
-
-        // Mantem um array atualizado com as jogadas do computador
-        if(!xIsNext) {
+        if(xIsNext) {
+            this.playerMoves.push(i);
+        } else {
             this.computerMoves.push(i);
         }
         
         /*
-            Jogada do computador
-            Se for possível fechar uma linha, é simulado o click no quadrado faltante,
-            se não, retorna uma jogada aleatória
+            Jogadas do computador:
+                1. Se for possível fechar uma linha, é dado o click no quadrado faltante (vencendo o jogo)
+                2. Se o player estiver pra ganhar, é dado o click no quadrado faltante (impedindo a vitória)
+                3. Em última condição retorna uma jogada aleatória.
         */
-        if (xIsNext && this.state.stepNumber < 8) {
-            const moveWinner = MoveWinner(this.allMoves, this.computerMoves, xIsNext);
-            const index = moveWinner ? moveWinner : GetRandom(this.allMoves);
+        if (xIsNext && this.stepNumber < 8) {
+            const computerMoveWinner = MoveWinner(this.allMoves, this.computerMoves, xIsNext);
+            const playerMoveWinner = MoveWinner(this.allMoves, this.playerMoves, xIsNext);
+            let index;
+            if(computerMoveWinner){
+                index = computerMoveWinner;
+            } else if(playerMoveWinner){
+                index = playerMoveWinner;
+            } else {
+                index = GetRandom(this.allMoves);
+            }
             const square = document.querySelector(`.square[data-index='${ index }']`);
             ComputerClick(square);
         }
     }
 
-    jumpTo(step) {
+    restart() {
         this.setState({
-            stepNumber: step,
-            xIsNext: (step % 2 === 0),
+            xIsNext: true
         })
+        this.stepNumber = 0;
+        this.allMoves = Array(9).fill(null);
+        this.computerMoves = [];
+        this.playerMoves = [];
     }
 
     render() {
         const history = this.state.history;
-        const current = history[this.state.stepNumber];
+        const current = history[this.stepNumber];
         const winner = CalculateWinner(current.squares);
-
         let status;
         if (winner) {
             this.gameFinished = 'finished';
             status = winner === 'X' ? `${player1} winner` : `${player2} winner`;
-        } else if (this.state.stepNumber === 9) {
+        } else if (this.stepNumber === 9) {
             this.gameFinished = 'finished';
             status = 'Tie';
         } else {
             this.gameFinished = '';
             status = this.state.xIsNext ? `Next: ${player1} (X)` : `Next: ${player2} (O)`;
         }
-
         if (!winner && document.querySelector('.winner') !== null) {
             document.querySelectorAll('.winner').forEach(e => {
                 e.classList.remove('winner');
@@ -128,8 +117,8 @@ class Game extends React.Component {
                 <aside className="game-info">
                     <h2>{status}</h2>
                     {
-                        winner ? (
-                            <button onClick={() => { this.jumpTo(0) }} id="btn-restart">
+                        this.gameFinished === 'finished' ? (
+                            <button onClick={() => { this.restart() }} id="btn-restart">
                                 Restart
                             </button>
                         ) : ''
