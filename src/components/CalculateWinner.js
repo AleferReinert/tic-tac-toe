@@ -1,7 +1,6 @@
 import { Lines } from './Lines.js';
 
 export function CalculateWinner(squares) {
-
     for (let i = 0; i < Lines.length; i++) {
         const [a, b, c] = Lines[i];
         if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {

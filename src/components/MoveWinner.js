@@ -4,9 +4,9 @@ import { Lines } from "./Lines";
     Procura as jogadas do computador em cada linha de possível vitória
     Se encontrada duas jogadas na mesma linha e a restante for nula, retorna o index de null que é a jogada vencedora
 */
-export function MoveWinner(allMoves, individualMoves, xIsNext){
+export function MoveWinner(allMoves, individualMoves){
 
-    if(individualMoves.length >= 2 && xIsNext){
+    if(individualMoves.length >= 2){
         for(const line of Lines){
             let sum = 0;
             const moves = [];
